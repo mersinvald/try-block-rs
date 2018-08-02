@@ -3,5 +3,6 @@ name = "try-block"
 version = "0.1.0"
 authors = ["Mike Lubinets <lubinetsm@yandex.ru>"]
 license = "MIT"
+description = "macro that makes your error-catching blocks (appear) labmdaless"
 
 [dependencies]
