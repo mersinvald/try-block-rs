@@ -14,7 +14,7 @@ fn main() {
     let result: Result<_, ()> = try_block! {
         let a = do_one(x)?;
         let b = do_two(a)?;
-        Ok(b)
+        b
     };
 
     println!("{:?}", result);
