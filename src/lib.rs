@@ -1,3 +1,18 @@
+/// Macro for ok-wrapping any `Try` type. This works on stable through dark type magic.
+///
+/// Note that type inference is very finicky; you should give this a type ascription ASAP.
+/// ```
+/// # use try_block::wrap_ok;
+/// let r: Result<_, ()> = wrap_ok!(1);
+/// assert_eq!(r, Ok(1));
+/// ```
+#[macro_export]
+macro_rules! wrap_ok {
+    ($e:expr) => {{
+        ::std::iter::empty().try_fold($e, |_, x: std::convert::Infallible| match x {})
+    }};
+}
+
 /// Macro to make your error-handling blocks (appear) lambda-less
 /// and perform Ok-wrapping on the final value.
 ///
@@ -11,44 +26,25 @@
 /// ```
 ///
 /// #### After:
-/// ```ignore
+/// ```
+/// # use try_block::try_block;
+/// # type T = (); type E = ();
+/// # fn do_one((): T) -> Result<T, E> { Ok(()) }
+/// # fn do_two((): T) -> Result<T, E> { Ok(()) }
+/// # let x = ();
 /// let result: Result<T, E> = try_block! {
 ///    let a = do_one(x)?;
 ///    let b = do_two(a)?;
 ///    b
 /// };
 /// ```
-
 #[macro_export]
 macro_rules! try_block {
     { $($token:tt)* } => {{
-        ( || $crate::FromOk::from_ok(
+        ( || $crate::wrap_ok!(
             { $($token)* }
         ))()
     }}
-}
-
-/// A type that can Ok-wrap some value, for use in the [`try_block`] macro.
-pub trait FromOk {
-    type Ok;
-    /// Constructs the wrapped type from an ok value.
-    fn from_ok(val: Self::Ok) -> Self;
-}
-
-impl<T, E> FromOk for Result<T, E> {
-    type Ok = T;
-    #[inline]
-    fn from_ok(val: T) -> Self {
-        Ok(val)
-    }
-}
-
-impl<T> FromOk for Option<T> {
-    type Ok = T;
-    #[inline]
-    fn from_ok(val: T) -> Self {
-        Some(val)
-    }
 }
 
 #[cfg(test)]
